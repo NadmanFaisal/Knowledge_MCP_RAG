@@ -10,6 +10,16 @@ sudo systemctl status ollama.service
 
 ```
 ```
+
+## Pull Open WebUI Docker Image:
+
+```
+docker pull ghcr.io/open-webui/open-webui:main
+```
+
+```
+```
+
 ## To run Open WebUI:
 ```
 
@@ -24,4 +34,3 @@ sudo docker run -d \
   ghcr.io/open-webui/open-webui:main
 ```
 
-```
