@@ -21,3 +21,11 @@ sudo docker run -d \
   --restart always \
   ghcr.io/open-webui/open-webui:main
 ```
+
+## To run the MCP server with openweb UI
+
+Open the root of the MCP server and activate thhe virtual environment, then ruon the following command:
+
+```
+uvx mcpo --port 8000 -- your_mcp_server_command
+```
