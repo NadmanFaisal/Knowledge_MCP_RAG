@@ -8,12 +8,15 @@ from database.database import *
 PDF_PATH = 'datasets/L03 - Utility Trees and Styles.pdf'
 FILE_PATH = 'datasets/lecture.txt'
 
-text = extract_text(PDF_PATH)
-save_to_text = save_to_text_file(FILE_PATH, text)
+# text = extract_text(PDF_PATH)
+# save_to_text = save_to_text_file(FILE_PATH, text)
 
 async def main():
     # await client.delete_collection(name="my_collection")
-    await save_to_db(FILE_PATH)
+    # await save_to_db(FILE_PATH)
+    query = input("What can I help you with?\n")
+    documents = await get_documents(query)
+    print(documents)
 
 asyncio.run(main())
 

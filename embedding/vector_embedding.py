@@ -14,7 +14,7 @@ def get_similarity(queries, documents):
     return similarity
 
 def embed_query(queries):
-    query_embeddings = model.encome(queries, prompt_name="query")
+    query_embeddings = model.encode(queries, prompt_name="query")
     return query_embeddings
 
 def embed_document(documents):

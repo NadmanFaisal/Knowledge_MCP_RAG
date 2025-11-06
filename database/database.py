@@ -25,6 +25,17 @@ async def save_to_db(file_path):
     )
     return True
 
+async def get_documents(query):
+    client = await chromadb.AsyncHttpClient(host='192.168.68.104', port=8000)
+    query_embedding = embed_query(query)
+
+    collection = await client.get_or_create_collection(name="my_collection")
+    documents = await collection.query(
+        query_embeddings=query_embedding
+    )
+    return documents
+
+
 # async def main():
 #     # await client.delete_collection(name="my_collection")
 #     await save_to_db(client)
