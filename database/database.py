@@ -1,5 +1,6 @@
 import chromadb
 import asyncio
+import uuid
 
 from data_cleaning.data_extractor import *
 from embedding.vector_embedding import *
@@ -12,7 +13,8 @@ async def save_to_db(file_path):
     document_ids = []
 
     for i in range(0, len(dataset)):
-        document_ids.append(f'{i}')
+        random_id = uuid.uuid4()
+        document_ids.append(f'{random_id}')
     
     print(f'Loaded {len(dataset)} coherent chunks')
     print(f'Loaded ids: {len(document_ids)}')
@@ -34,10 +36,3 @@ async def get_documents(query):
         query_embeddings=query_embedding
     )
     return documents
-
-
-# async def main():
-#     # await client.delete_collection(name="my_collection")
-#     await save_to_db(client)
-# 
-# asyncio.run(main())
