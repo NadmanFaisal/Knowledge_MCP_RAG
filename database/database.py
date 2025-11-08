@@ -26,7 +26,7 @@ async def save_to_db(file_path):
     print(f'Loaded ids: {len(document_ids)}')
 
     collection = await client.get_or_create_collection(name="my_collection")
-    await collection.add(
+    await collection.upsert(
         documents=dataset,
         ids=document_ids,
         embeddings=document_embeddings,
