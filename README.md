@@ -8,7 +8,18 @@ The architecture is built for traceability, speed, and modularity, using contain
 
 ## Technologies and Tech-Stack
 
+| Component | Technology | Rationale & Contribution |
+| :--- | :--- | :--- |
+| **Orchestration** | **Python (AsyncIO)** / `uv` | Manages the asynchronous data ingestion pipeline and serves the custom application logic. `uv` is used for ultra-fast dependency management. |
+| **Vector Embedding** | **Qwen3-Embedding-0.6B** (`SentenceTransformer`) | Utilized a specialized, state-of-the-art embedding model to generate high-quality vector representations, ensuring superior semantic relevance over generic models. |
+| **Vector Database** | **ChromaDB** (Dockerized) | Provides scalable, persistent storage for vector embeddings, original text chunks, and metadata (source tracing). Deployed in client-server mode for isolation. |
+| **API/Tooling** | **FastMCP** (Model Context Protocol) | Implements a standardized interface, allowing any MCP-compliant LLM (e.g., Claude) to consume the custom RAG functionality as a callable tool (`get_documents_from_RAG`). |
+| **Observability** | **OpenTelemetry (OTEL) & Zipkin** | Integrated tracing infrastructure to monitor request flow from the MCP proxy, through the Python server, to the ChromaDB database, aiding in performance analysis and debugging. |
+| **Deployment** | **Docker Compose** | Used to manage and deploy the distributed service architecture (ChromaDB, OTEL Collector, Zipkin) within an isolated network. |
+
 ## Architecture Highlights
+
+![System_diagram](https://github.com/NadmanFaisal/MCP_Server/blob/main/documentations/MCP_RAG_Server.drawio.png)
 
 This project demonstrates proficiency in designing and implementing modern, distributed micro-architectures:
 
@@ -48,23 +59,29 @@ This command launches the vector database (ChromaDB), the OTEL collector, and Zi
 docker compose up -d
 ```
 
-2. Run the Data Ingestion Pipeline
+2. Start the Virtual environment
+```
+python3 -m venv .venv
+pip install -r requirements.txt
+source ./venv/bin/activate
+```
+
+3. Run the Data Ingestion Pipeline
 
 This loads, cleans, embeds (using Qwen3), and stores all PDF files in the datasets/ folder into ChromaDB.
 
 ```
-# Run this from the root directory of the project
 python main.py
 ```
 
-3. Run the MCP Server (The Tool)
+4. Run the MCP Server (The Tool)
 
 This command starts the local MCP server, which listens for requests from the LLM client (or Open WebUI/FastAPI proxy).
 ```
 uvx mcpo --port 8000 -- /home/nadman/Desktop/Personal_Projects/MCP_Server/.venv/bin/python server.py
 ```
 
-4. Run the Open WebUI Client
+5. Run the Open WebUI Client
 
 This provides a UI for testing, connecting to your Ollama LLM and your running MCP server.
 
@@ -78,7 +95,7 @@ sudo docker run -d \
   --restart always \
   ghcr.io/open-webui/open-webui:main
 ```
-4. Run the Open WebUI Client
+6. Run the Open WebUI Client
 
 This provides a UI for testing, connecting to your Ollama LLM and your running MCP server.
 ```
