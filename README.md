@@ -17,6 +17,15 @@ The architecture is built for traceability, speed, and modularity, using contain
 | **Observability** | **OpenTelemetry (OTEL) & Zipkin** | Integrated tracing infrastructure to monitor request flow from the MCP proxy, through the Python server, to the ChromaDB database, aiding in performance analysis and debugging. |
 | **Deployment** | **Docker Compose** | Used to manage and deploy the distributed service architecture (ChromaDB, OTEL Collector, Zipkin) within an isolated network. |
 
+## Limitations of the System
+
+- Retrieval Latency: The RAG server must embed the query, run a vector search (in this case, ChromaDB), and fetch the top-K documents. For large indexes (millions of vectors), this can become a noticeable latency bottleneck.
+- Semantic Fragmentation: Concepts split across multiple slides/chunks can break continuity. The retriever may return only part of a section (e.g., the start of a conclusion) and miss follow-up content, leading to incomplete/improvised answers.
+- Context Irrelevance ("Garbage In"): The retrieval system may return documents that are technically similar by vector distance but semantically irrelevant to the user's question. If the LLM is fed irrelevant context, it can become distracted, leading to poor or generalized answers.
+- Prompt Dilution: Sending too much retrieved text (known as "context stuffing") can dilute the LLM's focus, suppress its existing internal knowledge, and lead to less confident or less accurate responses, despite having the correct information available.
+- Token Limits: Every LLM has a maximum token limit (context window). The combined length of the user query, the retrieved documents, and the prompt template/instructions must fit within this limit. If the retrieved documents exceed the limit, the RAG server must truncate them, potentially cutting off vital information.
+- Context Window Cost: Passing large amounts of retrieved context to a commercial LLM (like GPT-4) increases the token cost of the API call, making the RAG system significantly more expensive to operate at scale compared to sending only a short user query.
+
 ## Architecture Highlights
 
 ![System_diagram](https://github.com/NadmanFaisal/MCP_Server/blob/main/documentations/MCP_RAG_Server.drawio.png)
@@ -65,23 +74,31 @@ python3 -m venv .venv
 pip install -r requirements.txt
 source ./venv/bin/activate
 ```
+3. In the root of the project, create a .env file and paste the following:
+```
+CHROMA_DB_HOST=<YOUR_CHROMA_DB_IP>
+PORT=<PORT_WHERE_CHROMA_DB_IS_RUNNING>
+```
+4. Place some PDF files into the folder `datasets`
 
-3. Run the Data Ingestion Pipeline
+This folder contains the folders that are to be converted to text documents, and saved in the vector database as embeddings, along with metadata.
+
+5. Run the Data Ingestion Pipeline
 
 This loads, cleans, embeds (using Qwen3), and stores all PDF files in the datasets/ folder into ChromaDB.
 
 ```
-python main.py
+python pipeline.py
 ```
 
-4. Run the MCP Server (The Tool)
+6. Run the MCP Server (The Tool)
 
 This command starts the local MCP server, which listens for requests from the LLM client (or Open WebUI/FastAPI proxy).
 ```
 uvx mcpo --port 8000 -- /home/nadman/Desktop/Personal_Projects/MCP_Server/.venv/bin/python server.py
 ```
 
-5. Run the Open WebUI Client
+7. Run the Open WebUI Client
 
 This provides a UI for testing, connecting to your Ollama LLM and your running MCP server.
 
@@ -95,7 +112,7 @@ sudo docker run -d \
   --restart always \
   ghcr.io/open-webui/open-webui:main
 ```
-6. Run the Open WebUI Client
+8. Run the Open WebUI Client
 
 This provides a UI for testing, connecting to your Ollama LLM and your running MCP server.
 ```
